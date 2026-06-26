@@ -43,6 +43,34 @@ Terraform • GitHub Actions • FastAPI
 - 📧 Email: `rithekeswar77@gmail.com
 - 💼 [LinkedIn](https://www.linkedin.com/in/rithekeswar-m-23162432b?utm_source=share_via&utm_content=profile&utm_medium=member_android)
 - 🌐 Open to **AI/ML Engineer** and **Cloud Engineer** roles!
+from fastapi import FastAPI
+from pydantic import BaseModel
+import joblib
+from sklearn.feature_extraction.text import TfidfVectorizer
 
+app = FastAPI(title="ML Sentiment API")
+
+class TextInput(BaseModel):
+    text: str
+
+# Load model (we'll train a simple one)
+@app.on_event("startup")
+def load_model():
+    global model, vectorizer
+    # For demo - in real project train and save model
+    model = joblib.load("model.joblib") if os.path.exists("model.joblib") else None
+    vectorizer = joblib.load("vectorizer.joblib") if os.path.exists("vectorizer.joblib") else None
+
+@app.get("/")
+def read_root():
+    return {"status": "healthy", "service": "ML Sentiment API"}
+
+@app.post("/predict")
+def predict(input: TextInput):
+    if model is None:
+        return {"sentiment": "positive", "confidence": 0.85}  # demo
+    X = vectorizer.transform([input.text])
+    pred = model.predict(X)[0]
+    return {"sentiment": "positive" if pred == 1 else "negative", "text": input.text}
 *Made with ❤️ for AI & Cloud*# fastapi-ml-api
 Aspiring AI &amp; Cloud Engineer
